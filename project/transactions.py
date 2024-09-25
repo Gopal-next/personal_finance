@@ -2,19 +2,60 @@ import sqlite3
 from datetime import datetime
 
 
+# def add_transaction(user_id, transaction_type, category, amount, date=None):
+#     conn = sqlite3.connect('finance.db')
+#     cursor = conn.cursor()
+#     if date is None:
+#         date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+#     cursor.execute('''
+#         INSERT INTO transactions (user_id, transaction_type, category, amount, date)
+#         VALUES (?, ?, ?, ?, ?)
+#     ''', (user_id, transaction_type, category, amount, date))
+    
+#     conn.commit()
+#     conn.close()
+
+import sqlite3
+from datetime import datetime
+
 def add_transaction(user_id, transaction_type, category, amount, date=None):
     conn = sqlite3.connect('finance.db')
     cursor = conn.cursor()
+    
     if date is None:
         date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    # Insert the new transaction
     cursor.execute('''
         INSERT INTO transactions (user_id, transaction_type, category, amount, date)
         VALUES (?, ?, ?, ?, ?)
     ''', (user_id, transaction_type, category, amount, date))
     
     conn.commit()
+
+    # Check the user's budget for the category
+    cursor.execute('SELECT monthly_budget FROM budget WHERE user_id = ? AND category = ?', (user_id, category))
+    budget = cursor.fetchone()
+
+    if budget:
+        budget_limit = budget[0]
+
+        # Calculate total expenses for the category
+        cursor.execute('''
+            SELECT SUM(amount) 
+            FROM transactions 
+            WHERE user_id = ? AND category = ? AND transaction_type = 'expense'
+        ''', (user_id, category))
+        
+        total_expense = cursor.fetchone()[0] or 0  # Use 0 if no expenses found
+
+        # Notify if the total expense exceeds the budget
+        if total_expense > budget_limit:
+            print(f"Notification: Your expenses in the category '{category}' have exceeded the budget limit of {budget_limit}. Total expenses: {total_expense}. Delete or update the transactions to not to get notification")
+
     conn.close()
+
 
 def view_all_transactions(user_id):
     conn = sqlite3.connect('finance.db')

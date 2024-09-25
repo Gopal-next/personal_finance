@@ -60,8 +60,7 @@ def logged_in_menu(user_id):
         # Prompt for transaction type (income/expense)
             transaction_type = click.prompt(
                 "Enter transaction type", 
-                type=click.Choice(['income', 'expense']), 
-                help='Type your transaction type'
+                type=click.Choice(['income', 'expense'])
             )
 
             # Dynamically prompt for category based on transaction type
@@ -69,15 +68,13 @@ def logged_in_menu(user_id):
                 category = click.prompt(
                     "Enter category", 
                     type=click.Choice(['salary', 'bonus', 'other']), 
-                    show_choices=True,
-                    help="Choose your income category"
+                    show_choices=True
                 )
             elif transaction_type == 'expense':
                 category = click.prompt(
                     "Enter category", 
                     type=click.Choice(['rent', 'food', 'drink', 'travel', 'other']), 
-                    show_choices=True,
-                    help="Choose your expense category"
+                    show_choices=True
                 )
 
             # Prompt for amount
